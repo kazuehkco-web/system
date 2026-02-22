@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>香港代購管理系統 v3</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@300;400;500;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#0a0a0f;--surface:#13131a;--surface2:#1c1c28;--surface3:#252535;--border:#2a2a3d;--accent:#7c6dff;--accent2:#ff6b9d;--accent3:#00d4aa;--text:#e8e8f0;--text2:#9898b0;--text3:#5a5a75;--gold:#f5c842;--danger:#ff4d6d;--warning:#ff9f43;--success:#00d4aa;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans HK',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+.header{background:linear-gradient(135deg,var(--surface),#1a1a2e);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.logo{display:flex;align-items:center;gap:12px;}
+.logo-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.logo-text{font-size:17px;font-weight:700;}
+.logo-sub{font-size:10px;color:var(--text2);font-family:'Space Mono',monospace;}
+.header-actions{display:flex;gap:8px;align-items:center;}
+.channel-connect-row{display:flex;gap:8px;}
+.ch-btn{padding:6px 12px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;display:flex;align-items:center;gap:5px;transition:all 0.2s;position:relative;}
+.ch-btn.ig{background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);color:#fff;}
+.ch-btn.wa{background:#25d366;color:#000;}
+.ch-btn.web{background:var(--accent3);color:#000;}
+.ch-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.3);}
+.ch-dot{width:7px;height:7px;border-radius:50%;background:#0f0;display:inline-block;animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+.btn{padding:8px 14px;border-radius:8px;border:none;cursor:pointer;font-family:'Noto Sans HK',sans-serif;font-size:13px;font-weight:500;transition:all 0.2s;display:inline-flex;align-items:center;gap:6px;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:#6b5ce7;transform:translateY(-1px);}
+.btn-ghost{background:var(--surface3);color:var(--text2);border:1px solid var(--border);}
+.btn-ghost:hover{background:var(--surface2);color:var(--text);}
+.btn-danger{background:var(--danger);color:#fff;}
+.btn-danger:hover{background:#e0314f;}
+.btn-success{background:var(--success);color:#000;}
+.btn-warning{background:var(--warning);color:#000;}
+.layout{display:flex;height:calc(100vh - 60px);}
+.sidebar{width:210px;background:var(--surface);border-right:1px solid var(--border);padding:16px 0;flex-shrink:0;overflow-y:auto;}
+.nav-label{font-size:10px;color:var(--text3);font-family:'Space Mono',monospace;letter-spacing:1.5px;text-transform:uppercase;padding:0 16px;margin-bottom:5px;margin-top:12px;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 12px;margin:0 8px 2px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--text2);transition:all 0.15s;}
+.nav-item:hover{background:var(--surface2);color:var(--text);}
+.nav-item.active{background:linear-gradient(135deg,rgba(124,109,255,.2),rgba(255,107,157,.1));color:var(--accent);border:1px solid rgba(124,109,255,.3);}
+.nav-badge{margin-left:auto;background:var(--accent);color:#fff;font-size:10px;padding:1px 5px;border-radius:10px;font-family:'Space Mono',monospace;}
+.nav-badge.red{background:var(--danger);}
+.nav-badge.green{background:var(--success);color:#000;}
+.main{flex:1;overflow-y:auto;padding:24px 28px;}
+.stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;position:relative;overflow:hidden;transition:transform .2s;}
+.stat-card:hover{transform:translateY(-2px);}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.stat-card.purple::before{background:linear-gradient(90deg,var(--accent),transparent);}
+.stat-card.pink::before{background:linear-gradient(90deg,var(--accent2),transparent);}
+.stat-card.green::before{background:linear-gradient(90deg,var(--success),transparent);}
+.stat-card.gold::before{background:linear-gradient(90deg,var(--gold),transparent);}
+.stat-card.red::before{background:linear-gradient(90deg,var(--danger),transparent);}
+.stat-num{font-size:26px;font-weight:900;font-family:'Space Mono',monospace;}
+.stat-num.purple{color:var(--accent);}.stat-num.pink{color:var(--accent2);}.stat-num.green{color:var(--success);}.stat-num.gold{color:var(--gold);}.stat-num.red{color:var(--danger);}
+.stat-label{font-size:12px;color:var(--text2);margin-top:5px;}
+.stat-sub{font-size:10px;color:var(--text3);margin-top:2px;font-family:'Space Mono',monospace;}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.section-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.filter-bar{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.filter-input{background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:7px 11px;font-size:13px;font-family:'Noto Sans HK',sans-serif;outline:none;transition:border-color .2s;}
+.filter-input:focus,.form-input:focus,.form-textarea:focus,.form-select:focus{border-color:var(--accent);}
+.filter-input.wide{flex:1;min-width:180px;}
+.filter-select{background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:7px 11px;font-size:13px;font-family:'Noto Sans HK',sans-serif;outline:none;cursor:pointer;}
+.pill{padding:5px 11px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--border);background:var(--surface2);color:var(--text2);transition:all .15s;}
+.pill.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.pill.ig.active{background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);border-color:transparent;}
+.pill.wa.active{background:#25d366;border-color:transparent;color:#000;}
+.pill.web.active{background:var(--accent3);border-color:transparent;color:#000;}
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+table{width:100%;border-collapse:collapse;}
+thead{background:var(--surface2);}
+th{padding:11px 13px;text-align:left;font-size:10px;color:var(--text3);font-family:'Space Mono',monospace;letter-spacing:.5px;text-transform:uppercase;border-bottom:1px solid var(--border);}
+td{padding:12px 13px;border-bottom:1px solid rgba(42,42,61,.5);font-size:13px;vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(124,109,255,.04);}
+.status{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap;}
+.status::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.s-unpaid{background:rgba(255,159,67,.15);color:var(--warning);border:1px solid rgba(255,159,67,.3);}
+.s-unpaid::before{background:var(--warning);}
+.s-paid{background:rgba(0,212,170,.15);color:var(--success);border:1px solid rgba(0,212,170,.3);}
+.s-paid::before{background:var(--success);}
+.s-unpurchased{background:rgba(152,152,176,.15);color:var(--text2);border:1px solid rgba(152,152,176,.3);}
+.s-unpurchased::before{background:var(--text2);}
+.s-purchased{background:rgba(124,109,255,.15);color:var(--accent);border:1px solid rgba(124,109,255,.3);}
+.s-purchased::before{background:var(--accent);}
+.s-kr-arrived{background:rgba(245,200,66,.15);color:var(--gold);border:1px solid rgba(245,200,66,.3);}
+.s-kr-arrived::before{background:var(--gold);}
+.s-kr-departed{background:rgba(255,107,157,.15);color:var(--accent2);border:1px solid rgba(255,107,157,.3);}
+.s-kr-departed::before{background:var(--accent2);}
+.s-hk-arrived{background:rgba(0,212,170,.15);color:var(--success);border:1px solid rgba(0,212,170,.3);}
+.s-hk-arrived::before{background:var(--success);}
+.s-hk-shipped{background:rgba(0,212,170,.25);color:#00ffcc;border:1px solid rgba(0,212,170,.5);}
+.s-hk-shipped::before{background:#00ffcc;box-shadow:0 0 6px #00ffcc;}
+.s-refund{background:rgba(255,77,109,.15);color:var(--danger);border:1px solid rgba(255,77,109,.3);}
+.s-refund::before{background:var(--danger);}
+.s-cancelled{background:rgba(90,90,117,.2);color:var(--text3);border:1px solid rgba(90,90,117,.3);}
+.s-cancelled::before{background:var(--text3);}
+.ch-tag{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:6px;font-size:11px;font-weight:600;}
+.ch-ig{background:linear-gradient(135deg,#833ab4,#fd1d1d);color:#fff;}
+.ch-wa{background:#25d366;color:#000;}
+.ch-web{background:var(--accent3);color:#000;}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:860px;max-height:92vh;overflow-y:auto;animation:slideUp .25s ease;}
+.modal.sm{max-width:440px;}.modal.md{max-width:620px;}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.modal-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface);z-index:1;}
+.modal-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.modal-body{padding:22px;}
+.modal-close{width:30px;height:30px;background:var(--surface3);border:1px solid var(--border);border-radius:7px;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .15s;}
+.modal-close:hover{background:var(--danger);color:#fff;}
+.form-group{margin-bottom:13px;}
+.form-label{font-size:12px;color:var(--text2);margin-bottom:5px;display:block;}
+.form-input,.form-textarea,.form-select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:9px 11px;font-size:13px;font-family:'Noto Sans HK',sans-serif;outline:none;transition:border-color .2s;}
+.form-textarea{resize:vertical;min-height:75px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.detail-section{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.detail-section.full{grid-column:1/-1;}
+.detail-section h4{font-size:10px;color:var(--text3);font-family:'Space Mono',monospace;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;}
+.detail-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:7px;font-size:13px;}
+.detail-row:last-child{margin-bottom:0;}
+.detail-label{color:var(--text2);flex-shrink:0;margin-right:10px;}
+.detail-value{color:var(--text);text-align:right;word-break:break-all;}
+.detail-value a{color:var(--accent);text-decoration:none;}
+.img-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;}
+.img-thumb{aspect-ratio:1;border-radius:8px;overflow:hidden;position:relative;cursor:pointer;}
+.img-thumb img{width:100%;height:100%;object-fit:cover;}
+.img-thumb .del-overlay{position:absolute;inset:0;background:rgba(255,77,109,.8);display:none;align-items:center;justify-content:center;font-size:20px;}
+.img-thumb:hover .del-overlay{display:flex;}
+.img-placeholder{aspect-ratio:1;background:var(--surface3);border:2px dashed var(--border);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text3);cursor:pointer;transition:all .2s;font-size:11px;gap:5px;}
+.img-placeholder:hover{border-color:var(--accent);color:var(--accent);background:rgba(124,109,255,.05);}
+.img-placeholder .icon{font-size:22px;}
+.timeline{display:flex;align-items:center;}
+.step-dot{width:26px;height:26px;border-radius:50%;border:2px solid var(--border);background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text3);flex-shrink:0;}
+.step-dot.done{border-color:var(--success);background:rgba(0,212,170,.2);color:var(--success);}
+.step-dot.current{border-color:var(--accent);background:rgba(124,109,255,.2);color:var(--accent);box-shadow:0 0 10px rgba(124,109,255,.4);}
+.step-line{flex:1;height:2px;background:var(--border);}
+.step-line.done{background:var(--success);}
+.step-label-row{display:flex;margin-top:5px;}
+.step-label{font-size:9px;color:var(--text3);text-align:center;flex:1;}
+.confirm-box{background:rgba(255,77,109,.1);border:1px solid rgba(255,77,109,.3);border-radius:10px;padding:14px;margin-bottom:14px;text-align:center;}
+.confirm-box .ci{font-size:34px;margin-bottom:6px;}
+.confirm-box p{font-size:13px;color:var(--text2);line-height:1.6;}
+.action-btns{display:flex;gap:5px;}
+.icon-btn{width:27px;height:27px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .15s;}
+.icon-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
+.icon-btn.del:hover{background:var(--danger);border-color:var(--danger);}
+.priority{padding:2px 7px;border-radius:4px;font-size:11px;font-weight:700;}
+.p-high{background:rgba(255,77,109,.2);color:var(--danger);}
+.p-mid{background:rgba(255,159,67,.2);color:var(--warning);}
+.p-low{background:rgba(152,152,176,.2);color:var(--text2);}
+.page-section{display:none;}
+.page-section.active{display:block;}
+.empty-state{text-align:center;padding:36px;color:var(--text3);}
+.empty-icon{font-size:44px;margin-bottom:10px;}
+.photo-batch{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px;}
+.photo-batch-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.photo-batch-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.photo-batch-meta{font-size:11px;color:var(--text3);font-family:'Space Mono',monospace;}
+.cards-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;}
+.info-card h4{font-size:10px;color:var(--text3);font-family:'Space Mono',monospace;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;}
+.cs-num{font-size:34px;font-weight:900;font-family:'Space Mono',monospace;}
+.cs-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;}
+.cs-item-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.one-click-section{background:linear-gradient(135deg,rgba(124,109,255,.1),rgba(255,107,157,.1));border:1px solid rgba(124,109,255,.3);border-radius:12px;padding:16px;margin-bottom:20px;}
+.one-click-title{font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.one-click-btns{display:flex;gap:8px;flex-wrap:wrap;}
+.toast{position:fixed;bottom:22px;right:22px;background:var(--surface);border:1px solid var(--success);border-radius:10px;padding:12px 16px;z-index:999;font-size:13px;display:none;animation:slideUp .3s ease;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:320px;}
+.toast.show{display:block;}
+.toast.error{border-color:var(--danger);}
+.inv-photo-preview{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px;}
+.upload-area{border:2px dashed var(--border);border-radius:8px;padding:20px;text-align:center;cursor:pointer;transition:all .2s;color:var(--text3);}
+.upload-area:hover{border-color:var(--accent);color:var(--accent);background:rgba(124,109,255,.05);}
+.tab-bar{display:flex;gap:4px;margin-bottom:16px;background:var(--surface2);padding:4px;border-radius:10px;border:1px solid var(--border);}
+.tab{padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer;color:var(--text2);transition:all .15s;}
+.tab.active{background:var(--accent);color:#fff;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--surface);}
+::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:3px;}
+::-webkit-scrollbar-thumb:hover{background:var(--accent);}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">🛍️</div>
+    <div>
+      <div class="logo-text">代購管理系統</div>
+      <div class="logo-sub">HK PROXY ORDER SYSTEM v3.0</div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <div class="channel-connect-row">
+      <button class="ch-btn ig" onclick="showConnect('ig')"><span class="ch-dot"></span>📸 Instagram</button>
+      <button class="ch-btn wa" onclick="showConnect('wa')"><span class="ch-dot"></span>💬 WhatsApp</button>
+      <button class="ch-btn web" onclick="showConnect('web')"><span class="ch-dot"></span>🌐 Website</button>
+    </div>
+    <button class="btn btn-ghost" onclick="exportExcel()" style="margin-left:4px">📊 匯出</button>
+    <button class="btn btn-primary" onclick="openOrderForm(null)">＋ 新增訂單</button>
+  </div>
+</div>
+
+<div class="layout">
+<div class="sidebar">
+  <div class="nav-label">主要功能</div>
+  <div class="nav-item active" onclick="showPage('orders',this)"><span>📦</span> 訂單總覽 <span class="nav-badge" id="badge-orders">0</span></div>
+  <div class="nav-item" onclick="showPage('inventory',this)"><span>🏪</span> 現貨庫存 <span class="nav-badge green" id="badge-inv">0</span></div>
+  <div class="nav-item" onclick="showPage('photos',this)"><span>📸</span> 庫存照片紀錄 <span class="nav-badge" id="badge-photos">0</span></div>
+  <div class="nav-item" onclick="showPage('problems',this)"><span>⚠️</span> 問題回報 <span class="nav-badge red" id="badge-prob">0</span></div>
+  <div class="nav-item" onclick="showPage('cs',this)"><span>💬</span> 客服紀錄 <span class="nav-badge" id="badge-cs">0</span></div>
+  <div class="nav-label">快速篩選</div>
+  <div class="nav-item" onclick="quickFilter('unpaid')"><span>💳</span> 未付款 <span class="nav-badge red" id="qf-unpaid">0</span></div>
+  <div class="nav-item" onclick="quickFilter('purchased')"><span>🛒</span> 採購中 <span class="nav-badge" id="qf-purchased">0</span></div>
+  <div class="nav-item" onclick="quickFilter('kr-departed')"><span>✈️</span> 韓國出發 <span class="nav-badge" id="qf-kr-departed">0</span></div>
+  <div class="nav-item" onclick="quickFilter('hk-shipped')"><span>🚚</span> 香港發貨 <span class="nav-badge green" id="qf-hk-shipped">0</span></div>
+  <div class="nav-item" onclick="quickFilter('refund')"><span>🔄</span> 待退款 <span class="nav-badge red" id="qf-refund">0</span></div>
+</div>
+
+<div class="main">
+
+<!-- ORDERS PAGE -->
+<div id="page-orders" class="page-section active">
+  <div class="stats-row">
+    <div class="stat-card purple"><div class="stat-num purple" id="stat-total">0</div><div class="stat-label">總訂單數</div><div class="stat-sub">本月</div></div>
+    <div class="stat-card green"><div class="stat-num green" id="stat-revenue">HK$0</div><div class="stat-label">已收款</div><div class="stat-sub">已確認</div></div>
+    <div class="stat-card pink"><div class="stat-num pink" id="stat-shipping">0</div><div class="stat-label">香港發貨中</div><div class="stat-sub">待簽收</div></div>
+    <div class="stat-card gold"><div class="stat-num gold" id="stat-transit">0</div><div class="stat-label">韓國出發中</div><div class="stat-sub">運送中</div></div>
+    <div class="stat-card red"><div class="stat-num red" id="stat-unpaid">0</div><div class="stat-label">待付款</div><div class="stat-sub">需跟進</div></div>
+  </div>
+
+  <div class="one-click-section">
+    <div class="one-click-title">⚡ 一鍵處理功能</div>
+    <div class="one-click-btns">
+      <button class="btn btn-warning" onclick="oneClick('notify-unpaid')">📢 通知未付款客戶</button>
+      <button class="btn btn-success" onclick="oneClick('mark-purchased')">✅ 批量標記已採購</button>
+      <button class="btn btn-primary" onclick="oneClick('send-tracking')">📦 發送物流通知</button>
+      <button class="btn btn-ghost" onclick="oneClick('export-pending')">📋 匯出待辦訂單</button>
+      <button class="btn btn-danger" onclick="oneClick('flag-overdue')">🚨 標記逾期未付款</button>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <input class="filter-input wide" type="text" id="searchInput" placeholder="🔍  搜尋訂單號、客戶、商品..." oninput="filterOrders()">
+    <select class="filter-select" id="statusFilter" onchange="filterOrders()">
+      <option value="">全部狀態</option>
+      <option value="unpaid">顧客未付款</option><option value="paid">顧客完成付款</option>
+      <option value="unpurchased">未採購</option><option value="purchased">已採購</option>
+      <option value="kr-arrived">到達韓國倉庫</option><option value="kr-departed">從韓國出發</option>
+      <option value="hk-arrived">到達香港</option><option value="hk-shipped">香港快遞發貨</option>
+      <option value="refund">訂單待退款</option><option value="cancelled">訂單取消</option>
+    </select>
+    <div style="display:flex;gap:5px">
+      <div class="pill active" onclick="togglePill(this,'all')">全部</div>
+      <div class="pill ig" onclick="togglePill(this,'ig')">📸 IG</div>
+      <div class="pill wa" onclick="togglePill(this,'wa')">💬 WA</div>
+      <div class="pill web" onclick="togglePill(this,'web')">🌐 Web</div>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table><thead><tr><th>訂單編號</th><th>渠道</th><th>客戶</th><th>商品</th><th>金額</th><th>狀態</th><th>物流單號</th><th>日期</th><th>操作</th></tr></thead>
+    <tbody id="orderTbody"></tbody></table>
+  </div>
+</div>
+
+<!-- INVENTORY PAGE -->
+<div id="page-inventory" class="page-section">
+  <div class="section-header">
+    <div class="section-title"><span>🏪</span> 香港現貨庫存</div>
+    <button class="btn btn-primary" onclick="openInvForm(null)">＋ 新增商品</button>
+  </div>
+  <div class="table-wrap">
+    <table><thead><tr><th>SKU</th><th>商品名稱</th><th>品牌</th><th>庫存</th><th>預留</th><th>可售</th><th>入庫日期</th><th>庫存照片</th><th>狀況</th><th>操作</th></tr></thead>
+    <tbody id="invTbody"></tbody></table>
+  </div>
+</div>
+
+<!-- PHOTOS PAGE -->
+<div id="page-photos" class="page-section">
+  <div class="section-header">
+    <div class="section-title"><span>📸</span> 庫存照片上傳紀錄</div>
+    <button class="btn btn-primary" onclick="openPhotoForm(null)">＋ 新增批次</button>
+  </div>
+  <div class="tab-bar">
+    <div class="tab active" onclick="switchPhotoTab('all',this)">全部批次</div>
+    <div class="tab" onclick="switchPhotoTab('kr',this)">🇰🇷 韓國出發前</div>
+    <div class="tab" onclick="switchPhotoTab('hk',this)">🇭🇰 到達香港後</div>
+    <div class="tab" onclick="switchPhotoTab('stock',this)">🏪 現貨庫存照</div>
+  </div>
+  <div id="photoBatches"></div>
+</div>
+
+<!-- PROBLEMS PAGE -->
+<div id="page-problems" class="page-section">
+  <div class="section-header">
+    <div class="section-title"><span>⚠️</span> 問題回報與處理</div>
+    <button class="btn btn-danger" onclick="openProblemForm(null)">＋ 回報問題</button>
+  </div>
+  <div class="table-wrap">
+    <table><thead><tr><th>問題編號</th><th>訂單</th><th>類型</th><th>優先級</th><th>描述</th><th>狀態</th><th>負責人</th><th>日期</th><th>操作</th></tr></thead>
+    <tbody id="problemTbody"></tbody></table>
+  </div>
+</div>
+
+<!-- CS PAGE -->
+<div id="page-cs" class="page-section">
+  <div class="section-header">
+    <div class="section-title"><span>💬</span> 客服處理紀錄</div>
+    <button class="btn btn-primary" onclick="openCSForm(null)">＋ 新增紀錄</button>
+  </div>
+  <div class="cards-grid">
+    <div class="info-card"><h4>本月諮詢</h4><div class="cs-num" style="color:var(--accent)" id="cs-stat-total">0</div><div style="font-size:11px;color:var(--text2);margin-top:4px" id="cs-stat-sub">↑ 12% vs 上月</div></div>
+    <div class="info-card"><h4>已處理</h4><div class="cs-num" style="color:var(--success)" id="cs-stat-done">0</div><div style="font-size:11px;color:var(--text2);margin-top:4px" id="cs-stat-pct">完成率</div></div>
+    <div class="info-card"><h4>待處理</h4><div class="cs-num" style="color:var(--warning)" id="cs-stat-pending">0</div><div style="font-size:11px;color:var(--text2);margin-top:4px">需今日跟進</div></div>
+    <div class="info-card"><h4>平均回覆</h4><div class="cs-num" style="color:var(--accent2)">2.4h</div><div style="font-size:11px;color:var(--text2);margin-top:4px">目標 &lt; 3h</div></div>
+  </div>
+  <div class="table-wrap">
+    <table><thead><tr><th>編號</th><th>類型</th><th>優先級</th><th>標題</th><th>描述</th><th>聯絡</th><th>狀態</th><th>日期</th><th>操作</th></tr></thead>
+    <tbody id="csTbody"></tbody></table>
+  </div>
+</div>
+
+</div><!-- .main -->
+</div><!-- .layout -->
+
+<!-- ORDER FORM -->
+<div class="modal-overlay" id="orderFormModal">
+  <div class="modal md">
+    <div class="modal-header"><div class="modal-title" id="orderFormTitle">➕ 新增訂單</div><button class="modal-close" onclick="closeModal('orderFormModal')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="editOrderId">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">下單渠道 *</label><select class="form-select" id="fChannel"><option value="ig">📸 Instagram</option><option value="wa">💬 WhatsApp</option><option value="web">🌐 Website</option></select></div>
+        <div class="form-group"><label class="form-label">客戶姓名 *</label><input class="form-input" id="fCustomer" placeholder="輸入客戶名稱"></div>
+      </div>
+      <div class="form-group"><label class="form-label">商品名稱 *</label><input class="form-input" id="fProduct" placeholder="例：LANEIGE 唇膜 Berry 色號"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">訂單金額 (HKD)</label><input class="form-input" id="fAmount" type="number" placeholder="0"></div>
+        <div class="form-group"><label class="form-label">訂單狀態</label>
+          <select class="form-select" id="fStatus">
+            <option value="unpaid">顧客未付款</option><option value="paid">顧客完成付款</option>
+            <option value="unpurchased">未採購</option><option value="purchased">已採購</option>
+            <option value="kr-arrived">到達韓國倉庫</option><option value="kr-departed">從韓國出發</option>
+            <option value="hk-arrived">到達香港</option><option value="hk-shipped">香港快遞發貨</option>
+            <option value="refund">訂單待退款</option><option value="cancelled">訂單取消</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">供應商名稱</label><input class="form-input" id="fSupplierName" placeholder="供應商名稱"></div>
+        <div class="form-group"><label class="form-label">貨源連結</label><input class="form-input" id="fSupplier" placeholder="https://..."></div>
+      </div>
+      <div class="form-group"><label class="form-label">物流單號</label><input class="form-input" id="fTracking" placeholder="例：SF1234567890"></div>
+      <div class="form-group"><label class="form-label">備註</label><textarea class="form-textarea" id="fNote" placeholder="特別要求、顏色、尺寸等..."></textarea></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px">
+        <button class="btn btn-ghost" onclick="closeModal('orderFormModal')">取消</button>
+        <button class="btn btn-primary" onclick="saveOrder()">💾 確認儲存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ORDER DETAIL -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">訂單詳情</div>
+      <div style="display:flex;gap:7px;align-items:center">
+        <button class="btn btn-ghost" onclick="editFromDetail()" style="padding:5px 10px;font-size:12px">✏️ 編輯</button>
+        <button class="modal-close" onclick="closeModal('detailModal')">✕</button>
+      </div>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- INVENTORY FORM -->
+<div class="modal-overlay" id="invFormModal">
+  <div class="modal md">
+    <div class="modal-header"><div class="modal-title" id="invFormTitle">➕ 新增庫存商品</div><button class="modal-close" onclick="closeModal('invFormModal')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="editInvSku">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">SKU 編號 *</label><input class="form-input" id="iSku" placeholder="INV-XXX"></div>
+        <div class="form-group"><label class="form-label">品牌</label><input class="form-input" id="iBrand" placeholder="例：LANEIGE"></div>
+      </div>
+      <div class="form-group"><label class="form-label">商品名稱 *</label><input class="form-input" id="iName" placeholder="商品全名"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">現有庫存數量</label><input class="form-input" id="iStock" type="number" placeholder="0"></div>
+        <div class="form-group"><label class="form-label">預留數量</label><input class="form-input" id="iReserved" type="number" placeholder="0"></div>
+      </div>
+      <div class="form-group"><label class="form-label">入庫日期</label><input class="form-input" id="iArrival" type="date"></div>
+      <div class="form-group">
+        <label class="form-label">📷 上傳庫存照片</label>
+        <div class="upload-area" onclick="triggerInvUpload()" id="invUploadArea">
+          <div style="font-size:28px;margin-bottom:6px">📷</div>
+          <div style="font-size:13px">點擊選擇圖片（可多選）</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:3px">支援 JPG / PNG / WebP</div>
+        </div>
+        <input type="file" id="invFileInput" accept="image/*" multiple style="display:none" onchange="handleInvPhotos(event)">
+        <div class="inv-photo-preview" id="invPhotoPreview"></div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px">
+        <button class="btn btn-ghost" onclick="closeModal('invFormModal')">取消</button>
+        <button class="btn btn-primary" onclick="saveInventory()">💾 確認儲存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- INVENTORY PHOTOS VIEWER -->
+<div class="modal-overlay" id="invPhotosModal">
+  <div class="modal md">
+    <div class="modal-header"><div class="modal-title" id="invPhotosTitle">📷 庫存照片</div><button class="modal-close" onclick="closeModal('invPhotosModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="img-grid" id="invPhotosGrid"></div>
+      <div style="display:flex;justify-content:flex-end;margin-top:14px">
+        <button class="btn btn-ghost" onclick="triggerInvAddPhoto()">＋ 新增照片</button>
+        <input type="file" id="invAddPhotoInput" accept="image/*" multiple style="display:none" onchange="handleInvAddPhotos(event)">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PHOTO BATCH FORM -->
+<div class="modal-overlay" id="photoFormModal">
+  <div class="modal md">
+    <div class="modal-header"><div class="modal-title" id="photoFormTitle">➕ 新增照片批次</div><button class="modal-close" onclick="closeModal('photoFormModal')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="editPhotoBatch">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">批次類型 *</label>
+          <select class="form-select" id="pbType">
+            <option value="kr">🇰🇷 韓國出發前</option>
+            <option value="hk">🇭🇰 到達香港後</option>
+            <option value="stock">🏪 現貨庫存照</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">相關訂單/批次</label><input class="form-input" id="pbRef" placeholder="BATCH-KR-XXXXXXXX"></div>
+      </div>
+      <div class="form-group"><label class="form-label">備註</label><input class="form-input" id="pbNote" placeholder="備註說明..."></div>
+      <div class="form-group">
+        <label class="form-label">📷 上傳照片（可多選）</label>
+        <div class="upload-area" onclick="triggerPhotoUpload()" id="photoUploadArea">
+          <div style="font-size:28px;margin-bottom:6px">📷</div>
+          <div style="font-size:13px">點擊選擇圖片</div>
+        </div>
+        <input type="file" id="photoFileInput" accept="image/*" multiple style="display:none" onchange="handlePhotoBatchUpload(event)">
+        <div class="inv-photo-preview" id="pbPhotoPreview"></div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px">
+        <button class="btn btn-ghost" onclick="closeModal('photoFormModal')">取消</button>
+        <button class="btn btn-primary" onclick="savePhotoBatch()">💾 確認儲存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROBLEM FORM -->
+<div class="modal-overlay" id="problemFormModal">
+  <div class="modal md">
+    <div class="modal-header"><div class="modal-title" id="probFormTitle">⚠️ 新增問題回報</div><button class="modal-close" onclick="closeModal('problemFormModal')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="editProbId">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">相關訂單編號</label><input class="form-input" id="pOrder" placeholder="ORD-XXXX-XXX"></div>
+        <div class="form-group"><label class="form-label">問題類型</label>
+          <select class="form-select" id="pType"><option>退款爭議</option><option>物流延誤</option><option>海關查驗</option><option>缺貨問題</option><option>商品損壞</option><option>其他</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">優先級</label>
+          <select class="form-select" id="pPriority"><option value="high">🔴 緊急</option><option value="mid">🟡 重要</option><option value="low">🟢 一般</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">負責人</label><input class="form-input" id="pPerson" placeholder="負責人姓名"></div>
+      </div>
+      <div class="form-group"><label class="form-label">問題狀態</label>
+        <select class="form-select" id="pStatus"><option>處理中</option><option>跟進中</option><option>等待結果</option><option>已解決</option></select>
+      </div>
+      <div class="form-group"><label class="form-label">問題描述 *</label><textarea class="form-textarea" id="pDesc" placeholder="詳細描述問題情況..."></textarea></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px">
+        <button class="btn btn-ghost" onclick="closeModal('problemFormModal')">取消</button>
+        <button class="btn btn-danger" onclick="saveProblem()">💾 確認儲存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CS FORM -->
+<div class="modal-overlay" id="csFormModal">
+  <div class="modal md">
+    <div class="modal-header"><div class="modal-title" id="csFormTitle">➕ 新增客服紀錄</div><button class="modal-close" onclick="closeModal('csFormModal')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="editCsId">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">類型</label>
+          <select class="form-select" id="csType">
+            <option>投訴</option><option>查詢物流</option><option>退款諮詢</option><option>代購費用查詢</option><option>付款方式查詢</option><option>商品查詢</option><option>其他</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">優先級</label>
+          <select class="form-select" id="csPriority"><option value="high">🔴 緊急</option><option value="mid">🟡 重要</option><option value="low">🟢 一般</option></select>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">標題 *</label><input class="form-input" id="csTitle" placeholder="簡短標題..."></div>
+      <div class="form-group"><label class="form-label">詳細描述 *</label><textarea class="form-textarea" id="csDesc" placeholder="詳細描述客服內容..."></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">聯絡方式</label><input class="form-input" id="csContact" placeholder="WhatsApp / IG / 電話..."></div>
+        <div class="form-group"><label class="form-label">狀態</label>
+          <select class="form-select" id="csStatus"><option>處理中</option><option>跟進中</option><option>等待回覆</option><option>已解決</option></select>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px">
+        <button class="btn btn-ghost" onclick="closeModal('csFormModal')">取消</button>
+        <button class="btn btn-primary" onclick="saveCS()">💾 確認儲存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CHANNEL CONNECT MODAL -->
+<div class="modal-overlay" id="connectModal">
+  <div class="modal sm">
+    <div class="modal-header"><div class="modal-title" id="connectTitle">連接渠道</div><button class="modal-close" onclick="closeModal('connectModal')">✕</button></div>
+    <div class="modal-body" id="connectBody"></div>
+  </div>
+</div>
+
+<!-- CONFIRM DELETE -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal sm">
+    <div class="modal-header"><div class="modal-title">🗑️ 確認刪除</div><button class="modal-close" onclick="closeModal('confirmModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="confirm-box"><div class="ci">⚠️</div><p id="confirmMsg">確定要刪除此項目嗎？<br>此操作<strong>無法復原</strong>。</p></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-ghost" onclick="closeModal('confirmModal')">取消</button>
+        <button class="btn btn-danger" id="confirmOkBtn">🗑️ 確認刪除</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ONE-CLICK RESULT MODAL -->
+<div class="modal-overlay" id="oneClickModal">
+  <div class="modal sm">
+    <div class="modal-header"><div class="modal-title" id="oneClickTitle">⚡ 一鍵處理</div><button class="modal-close" onclick="closeModal('oneClickModal')">✕</button></div>
+    <div class="modal-body" id="oneClickBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const statusMap={
+  unpaid:{label:'顧客未付款',cls:'s-unpaid'},paid:{label:'顧客完成付款',cls:'s-paid'},
+  unpurchased:{label:'未採購',cls:'s-unpurchased'},purchased:{label:'已採購',cls:'s-purchased'},
+  'kr-arrived':{label:'到達韓國倉庫',cls:'s-kr-arrived'},'kr-departed':{label:'從韓國出發',cls:'s-kr-departed'},
+  'hk-arrived':{label:'到達香港',cls:'s-hk-arrived'},'hk-shipped':{label:'香港快遞發貨',cls:'s-hk-shipped'},
+  refund:{label:'訂單待退款',cls:'s-refund'},cancelled:{label:'訂單取消',cls:'s-cancelled'}
+};
+const channelMap={ig:{label:'Instagram',cls:'ch-ig',icon:'📸'},wa:{label:'WhatsApp',cls:'ch-wa',icon:'💬'},web:{label:'Website',cls:'ch-web',icon:'🌐'}};
+const tlSteps=['unpaid','paid','unpurchased','purchased','kr-arrived','kr-departed','hk-arrived','hk-shipped'];
+const tlLabels=['未付款','已付款','未採購','已採購','韓國倉庫','韓國出發','到達香港','香港發貨'];
+
+let activeChFilter='all',currentDetailId=null,currentInvSku=null,pbTempPhotos=[],invTempPhotos=[];
+let photoTabFilter='all';
+
+let orders=[
+  {id:'ORD-2402-001',channel:'ig',customer:'Chan Mei',product:'LANEIGE 唇膜 Berry',amount:280,status:'hk-shipped',tracking:'SF1234567890',date:'2024-02-10',supplierName:'LANEIGE 官網',supplier:'https://laneige.com',note:'需要禮盒包裝'},
+  {id:'ORD-2402-002',channel:'wa',customer:'Lee Siu Ming',product:'COSRX 蝸牛精華 96%',amount:195,status:'kr-departed',tracking:'KR-HK-77821',date:'2024-02-11',supplierName:'COSRX Korea',supplier:'',note:''},
+  {id:'ORD-2402-003',channel:'web',customer:'Wong Ting',product:'SOME BY MI AHA BHA PHA',amount:150,status:'paid',tracking:'',date:'2024-02-12',supplierName:'Olive Young',supplier:'',note:'粉紅色款式'},
+  {id:'ORD-2402-004',channel:'ig',customer:'Lam Ka Yin',product:'INNISFREE 綠茶精華 80ml',amount:220,status:'unpaid',tracking:'',date:'2024-02-13',supplierName:'',supplier:'',note:'等待付款確認'},
+  {id:'ORD-2402-005',channel:'wa',customer:'Ng Siu Kwan',product:'ETUDE HOUSE 眼影盤 #05',amount:340,status:'kr-arrived',tracking:'KR-0992',date:'2024-02-08',supplierName:'Etude House 弘大',supplier:'',note:'限定版'},
+  {id:'ORD-2402-006',channel:'web',customer:'Cheung Wai',product:'Dr. Jart+ 虎皮霜 50ml',amount:480,status:'hk-arrived',tracking:'HK-RECV-011',date:'2024-02-07',supplierName:'Dr. Jart Official',supplier:'https://drjart.com',note:''},
+  {id:'ORD-2402-007',channel:'ig',customer:'Yip Hoi Tung',product:'MISSHA 超水份安瓶 5pcs',amount:125,status:'unpurchased',tracking:'',date:'2024-02-14',supplierName:'',supplier:'',note:'請採購補充'},
+  {id:'ORD-2402-008',channel:'wa',customer:'Kwok Tsz Wai',product:'SULWHASOO 平衡精華 35ml',amount:890,status:'purchased',tracking:'',date:'2024-02-09',supplierName:'Sulwhasoo 新羅免稅店',supplier:'',note:'VIP客戶'},
+  {id:'ORD-2402-009',channel:'web',customer:'Ho Yan Ting',product:'ROM&ND 唇釉 #11',amount:98,status:'refund',tracking:'',date:'2024-02-05',supplierName:'',supplier:'',note:'顧客申請退款'},
+  {id:'ORD-2402-010',channel:'ig',customer:'Tang Siu Lung',product:'TONYMOLY 草莓鼻貼',amount:65,status:'cancelled',tracking:'',date:'2024-02-03',supplierName:'',supplier:'',note:'顧客取消'},
+];
+
+let inventory=[
+  {sku:'INV-001',name:'LANEIGE 唇膜 Berry',brand:'LANEIGE',stock:12,reserved:3,arrival:'2024-02-01',photos:[]},
+  {sku:'INV-002',name:'COSRX 蝸牛精華 96%',brand:'COSRX',stock:8,reserved:2,arrival:'2024-02-05',photos:[]},
+  {sku:'INV-003',name:'INNISFREE 綠茶精華',brand:'INNISFREE',stock:5,reserved:1,arrival:'2024-02-08',photos:[]},
+  {sku:'INV-004',name:'Dr. Jart+ 虎皮霜',brand:'Dr. Jart+',stock:3,reserved:3,arrival:'2024-02-10',photos:[]},
+  {sku:'INV-005',name:'SOME BY MI 去角質',brand:'SOME BY MI',stock:15,reserved:4,arrival:'2024-02-12',photos:[]},
+  {sku:'INV-006',name:'ROM&ND 唇釉套裝',brand:'ROM&ND',stock:0,reserved:0,arrival:'2024-01-28',photos:[]},
+];
+
+let photoBatches=[
+  {id:'BATCH-KR-20240210',type:'kr',ref:'第3批次',note:'出發貨品，全數完好',date:'2024-02-10 14:30',photos:[]},
+  {id:'BATCH-HK-20240213',type:'hk',ref:'第3批次',note:'全數到齊，狀況良好',date:'2024-02-13 10:15',photos:[]},
+  {id:'BATCH-KR-20240215',type:'kr',ref:'第4批次',note:'第4批次出發',date:'2024-02-15 16:45',photos:[]},
+  {id:'BATCH-HK-20240218',type:'hk',ref:'第4批次',note:'其中1件包裝輕微損壞',date:'2024-02-18 09:00',photos:[]},
+];
+
+let problems=[
+  {id:'PRB-001',order:'ORD-2402-009',type:'退款爭議',priority:'high',desc:'顧客收到顏色與圖片不符，要求全額退款',status:'處理中',person:'Alice',date:'2024-02-16'},
+  {id:'PRB-002',order:'ORD-2402-005',type:'物流延誤',priority:'mid',desc:'韓國倉庫滯留超過3天，需跟進物流商',status:'跟進中',person:'Bob',date:'2024-02-15'},
+  {id:'PRB-003',order:'ORD-2402-002',type:'海關查驗',priority:'high',desc:'包裹被海關抽查，預計延遲5-7個工作天',status:'等待結果',person:'Alice',date:'2024-02-14'},
+];
+
+let csRecords=[
+  {id:'CS-001',type:'投訴',priority:'high',title:'顧客投訴商品損壞',desc:'ORD-2402-009 顧客反映收到商品外包裝破損，要求補寄或退款',contact:'WhatsApp: 9XXX-XXXX',status:'處理中',date:'2024-02-16'},
+  {id:'CS-002',type:'查詢物流',priority:'mid',title:'多次查詢物流進度',desc:'5位顧客查詢韓國出發貨品進度，建議主動發送更新通知',contact:'批量回覆',status:'跟進中',date:'2024-02-15'},
+  {id:'CS-003',type:'代購費用查詢',priority:'mid',title:'代購手續費諮詢',desc:'3位新客戶詢問代購手續費及最低訂單金額，需整理報價單',contact:'Instagram DM',status:'跟進中',date:'2024-02-14'},
+  {id:'CS-004',type:'付款方式查詢',priority:'low',title:'轉數快付款方式查詢',desc:'顧客詢問是否支援轉數快，已確認支援並回覆',contact:'已解決',status:'已解決',date:'2024-02-13'},
+];
+
+// ====== ORDERS ======
+function renderOrders(data){
+  const tb=document.getElementById('orderTbody');
+  if(!data.length){tb.innerHTML=`<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">📭</div>沒有符合的訂單</div></td></tr>`;return;}
+  tb.innerHTML=data.map(o=>{
+    const s=statusMap[o.status],ch=channelMap[o.channel];
+    return `<tr>
+      <td><span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--accent);cursor:pointer" onclick="openDetail('${o.id}')">${o.id}</span></td>
+      <td><span class="ch-tag ${ch.cls}">${ch.icon} ${ch.label}</span></td>
+      <td><strong>${o.customer}</strong></td>
+      <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${o.product}">${o.product}</td>
+      <td style="font-family:'Space Mono',monospace;color:var(--gold)">HK$${o.amount}</td>
+      <td><span class="status ${s.cls}">${s.label}</span></td>
+      <td style="font-family:'Space Mono',monospace;font-size:11px;color:var(--text2)">${o.tracking||'—'}</td>
+      <td style="font-size:11px;color:var(--text2)">${o.date}</td>
+      <td><div class="action-btns">
+        <button class="icon-btn" title="詳情" onclick="openDetail('${o.id}')">👁</button>
+        <button class="icon-btn" title="編輯" onclick="openOrderForm('${o.id}')">✏️</button>
+        <button class="icon-btn del" title="刪除" onclick="confirmDelete('order','${o.id}')">🗑️</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+  updateStats();
+}
+
+function updateStats(){
+  const rev=orders.filter(o=>['paid','purchased','kr-arrived','kr-departed','hk-arrived','hk-shipped'].includes(o.status)).reduce((a,o)=>a+o.amount,0);
+  document.getElementById('stat-total').textContent=orders.length;
+  document.getElementById('stat-revenue').textContent='HK$'+rev.toLocaleString();
+  document.getElementById('stat-shipping').textContent=orders.filter(o=>o.status==='hk-shipped').length;
+  document.getElementById('stat-transit').textContent=orders.filter(o=>o.status==='kr-departed').length;
+  document.getElementById('stat-unpaid').textContent=orders.filter(o=>o.status==='unpaid').length;
+  document.getElementById('badge-orders').textContent=orders.length;
+  ['unpaid','purchased','kr-departed','hk-shipped','refund'].forEach(st=>{
+    const el=document.getElementById('qf-'+st);
+    if(el) el.textContent=orders.filter(o=>o.status===st).length;
+  });
+}
+
+function openOrderForm(id){
+  const o=id?orders.find(x=>x.id===id):null;
+  document.getElementById('orderFormTitle').textContent=o?'✏️ 編輯訂單':'➕ 新增訂單';
+  document.getElementById('editOrderId').value=o?o.id:'';
+  ['fChannel','fCustomer','fProduct','fAmount','fStatus','fSupplierName','fSupplier','fTracking','fNote'].forEach(f=>{
+    const k=f.replace(/^f/,'').toLowerCase();
+    const map={fchannel:'channel',fcustomer:'customer',fproduct:'product',famount:'amount',fstatus:'status',fsuppliername:'supplierName',fsupplier:'supplier',ftracking:'tracking',fnote:'note'};
+    document.getElementById(f).value=o?(o[map[f.toLowerCase()]]||''):'';
+  });
+  document.getElementById('orderFormModal').classList.add('open');
+}
+
+function saveOrder(){
+  const id=document.getElementById('editOrderId').value;
+  const cust=document.getElementById('fCustomer').value.trim();
+  const prod=document.getElementById('fProduct').value.trim();
+  if(!cust||!prod){showToast('❌ 請填寫客戶姓名及商品名稱','error');return;}
+  const data={channel:document.getElementById('fChannel').value,customer:cust,product:prod,
+    amount:parseInt(document.getElementById('fAmount').value)||0,
+    status:document.getElementById('fStatus').value,
+    supplierName:document.getElementById('fSupplierName').value,
+    supplier:document.getElementById('fSupplier').value,
+    tracking:document.getElementById('fTracking').value,
+    note:document.getElementById('fNote').value,
+    date:new Date().toISOString().slice(0,10)};
+  if(id){const idx=orders.findIndex(x=>x.id===id);orders[idx]={...orders[idx],...data};showToast('✅ 訂單已更新：'+id);}
+  else{data.id='ORD-'+Date.now().toString().slice(-6);orders.unshift(data);showToast('✅ 訂單新增成功：'+data.id);}
+  closeModal('orderFormModal');filterOrders();
+}
+
+function openDetail(id){
+  currentDetailId=id;
+  const o=orders.find(x=>x.id===id);if(!o)return;
+  const s=statusMap[o.status],ch=channelMap[o.channel];
+  const ci=tlSteps.indexOf(o.status);
+  document.getElementById('modalTitle').innerHTML=`<span class="ch-tag ${ch.cls}">${ch.icon}</span>${o.id}<span class="status ${s.cls}">${s.label}</span>`;
+  let tl='<div class="timeline">';
+  tlSteps.forEach((step,i)=>{
+    const cls=i<ci?'done':i===ci?'current':'';
+    if(i>0)tl+=`<div class="step-line ${i<=ci?'done':''}"></div>`;
+    tl+=`<div class="step-dot ${cls}">${i<ci?'✓':i===ci?'●':i+1}</div>`;
+  });
+  tl+='</div><div class="step-label-row">'+tlLabels.map(l=>`<div class="step-label">${l}</div>`).join('')+'</div>';
+  document.getElementById('modalBody').innerHTML=`
+    <div class="detail-section full" style="margin-bottom:14px"><h4>📍 訂單進度</h4>${tl}</div>
+    <div class="detail-grid" style="margin-bottom:14px">
+      <div class="detail-section"><h4>📋 訂單資訊</h4>
+        <div class="detail-row"><span class="detail-label">訂單編號</span><span class="detail-value" style="font-family:'Space Mono',monospace;color:var(--accent)">${o.id}</span></div>
+        <div class="detail-row"><span class="detail-label">下單日期</span><span class="detail-value">${o.date}</span></div>
+        <div class="detail-row"><span class="detail-label">金額</span><span class="detail-value" style="color:var(--gold);font-family:'Space Mono',monospace;font-weight:700">HK$${o.amount}</span></div>
+        <div class="detail-row"><span class="detail-label">物流單號</span><span class="detail-value" style="font-family:'Space Mono',monospace">${o.tracking||'—'}</span></div>
+      </div>
+      <div class="detail-section"><h4>👤 客戶 / 商品</h4>
+        <div class="detail-row"><span class="detail-label">客戶</span><span class="detail-value"><strong>${o.customer}</strong></span></div>
+        <div class="detail-row"><span class="detail-label">商品</span><span class="detail-value">${o.product}</span></div>
+        <div class="detail-row"><span class="detail-label">Supplier</span><span class="detail-value">${o.supplierName||'—'}</span></div>
+        <div class="detail-row"><span class="detail-label">備註</span><span class="detail-value">${o.note||'無'}</span></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-ghost" style="flex:1" onclick="nextStatus('${o.id}')">⏭️ 推進下一狀態</button>
+      <button class="btn btn-warning" style="flex:1" onclick="closeModal('detailModal');openOrderForm('${o.id}')">✏️ 編輯訂單</button>
+    </div>`;
+  document.getElementById('detailModal').classList.add('open');
+}
+
+function nextStatus(id){
+  const o=orders.find(x=>x.id===id);if(!o)return;
+  const ci=tlSteps.indexOf(o.status);
+  if(ci<0||ci>=tlSteps.length-1){showToast('已是最終狀態');return;}
+  o.status=tlSteps[ci+1];
+  closeModal('detailModal');filterOrders();
+  showToast('✅ 訂單狀態更新：'+statusMap[o.status].label);
+  openDetail(id);
+}
+
+function editFromDetail(){
+  const id=currentDetailId;closeModal('detailModal');openOrderForm(id);
+}
+
+// ====== INVENTORY ======
+function renderInventory(){
+  document.getElementById('invTbody').innerHTML=inventory.map(i=>{
+    const avail=i.stock-i.reserved,pct=i.stock>0?avail/i.stock*100:0;
+    const col=pct>50?'var(--success)':pct>20?'var(--warning)':'var(--danger)';
+    const pc=i.photos?i.photos.length:0;
+    return `<tr>
+      <td style="font-family:'Space Mono',monospace;font-size:11px;color:var(--text3)">${i.sku}</td>
+      <td><strong>${i.name}</strong></td>
+      <td style="color:var(--text2)">${i.brand}</td>
+      <td style="font-family:'Space Mono',monospace;color:var(--accent)">${i.stock}</td>
+      <td style="font-family:'Space Mono',monospace;color:var(--accent2)">${i.reserved}</td>
+      <td><span style="font-family:'Space Mono',monospace;font-weight:700;color:${col}">${avail}</span><div style="height:5px;border-radius:3px;background:var(--surface3);margin-top:3px;overflow:hidden;width:60px"><div style="width:${Math.min(pct,100)}%;height:100%;border-radius:3px;background:${col}"></div></div></td>
+      <td style="font-size:11px;color:var(--text2)">${i.arrival}</td>
+      <td><button class="btn btn-ghost" style="padding:4px 9px;font-size:11px" onclick="openInvPhotos('${i.sku}')">📷 ${pc} 張</button></td>
+      <td><span class="status ${avail>5?'s-paid':avail>0?'s-purchased':'s-refund'}">${avail>5?'充足':avail>0?'低庫存':'已售完'}</span></td>
+      <td><div class="action-btns">
+        <button class="icon-btn" title="編輯" onclick="openInvForm('${i.sku}')">✏️</button>
+        <button class="icon-btn del" title="刪除" onclick="confirmDelete('inv','${i.sku}')">🗑️</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('badge-inv').textContent=inventory.length;
+}
+
+function openInvForm(sku){
+  const i=sku?inventory.find(x=>x.sku===sku):null;
+  invTempPhotos=i&&i.photos?[...i.photos]:[];
+  document.getElementById('invFormTitle').textContent=i?'✏️ 編輯庫存商品':'➕ 新增庫存商品';
+  document.getElementById('editInvSku').value=i?i.sku:'';
+  document.getElementById('iSku').value=i?i.sku:'';document.getElementById('iSku').disabled=!!i;
+  document.getElementById('iBrand').value=i?i.brand:'';
+  document.getElementById('iName').value=i?i.name:'';
+  document.getElementById('iStock').value=i?i.stock:'';
+  document.getElementById('iReserved').value=i?i.reserved:'';
+  document.getElementById('iArrival').value=i?i.arrival:'';
+  renderInvPhotoPreview();
+  document.getElementById('invFormModal').classList.add('open');
+}
+
+function triggerInvUpload(){document.getElementById('invFileInput').click();}
+function handleInvPhotos(e){
+  const files=[...e.target.files];
+  files.forEach(f=>{const r=new FileReader();r.onload=ev=>{invTempPhotos.push(ev.target.result);renderInvPhotoPreview();};r.readAsDataURL(f);});
+}
+function renderInvPhotoPreview(){
+  document.getElementById('invPhotoPreview').innerHTML=invTempPhotos.map((src,i)=>`
+    <div class="img-thumb">
+      <img src="${src}">
+      <div class="del-overlay" onclick="invTempPhotos.splice(${i},1);renderInvPhotoPreview()">🗑️</div>
+    </div>`).join('')+`<div class="img-placeholder" onclick="triggerInvUpload()"><div class="icon">＋</div><div>新增</div></div>`;
+}
+
+function saveInventory(){
+  const origSku=document.getElementById('editInvSku').value;
+  const sku=document.getElementById('iSku').value.trim();
+  const name=document.getElementById('iName').value.trim();
+  if(!sku||!name){showToast('❌ 請填寫 SKU 及商品名稱','error');return;}
+  const data={sku,name,brand:document.getElementById('iBrand').value.trim(),
+    stock:parseInt(document.getElementById('iStock').value)||0,
+    reserved:parseInt(document.getElementById('iReserved').value)||0,
+    arrival:document.getElementById('iArrival').value,photos:[...invTempPhotos]};
+  if(origSku){const idx=inventory.findIndex(x=>x.sku===origSku);inventory[idx]=data;showToast('✅ 庫存已更新：'+sku);}
+  else{if(inventory.find(x=>x.sku===sku)){showToast('❌ SKU 已存在','error');return;}inventory.push(data);showToast('✅ 新增庫存：'+sku);}
+  closeModal('invFormModal');renderInventory();
+}
+
+function openInvPhotos(sku){
+  currentInvSku=sku;
+  const i=inventory.find(x=>x.sku===sku);
+  document.getElementById('invPhotosTitle').textContent=`📷 ${i.name} — 庫存照片`;
+  const grid=document.getElementById('invPhotosGrid');
+  if(!i.photos||!i.photos.length){
+    grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text3)">尚未上傳照片<br><button class="btn btn-ghost" style="margin-top:10px" onclick="triggerInvAddPhoto()">＋ 上傳照片</button></div>`;
+  } else {
+    grid.innerHTML=i.photos.map((src,idx)=>`<div class="img-thumb"><img src="${src}"><div class="del-overlay" onclick="delInvPhoto('${sku}',${idx})">🗑️</div></div>`).join('')+
+      `<div class="img-placeholder" onclick="triggerInvAddPhoto()"><div class="icon">＋</div><div>新增照片</div></div>`;
+  }
+  document.getElementById('invPhotosModal').classList.add('open');
+}
+
+function delInvPhoto(sku,idx){
+  const i=inventory.find(x=>x.sku===sku);
+  i.photos.splice(idx,1);openInvPhotos(sku);renderInventory();
+}
+function triggerInvAddPhoto(){document.getElementById('invAddPhotoInput').click();}
+function handleInvAddPhotos(e){
+  const sku=currentInvSku;const i=inventory.find(x=>x.sku===sku);if(!i.photos)i.photos=[];
+  const files=[...e.target.files];
+  let done=0;
+  files.forEach(f=>{const r=new FileReader();r.onload=ev=>{i.photos.push(ev.target.result);done++;if(done===files.length){openInvPhotos(sku);renderInventory();showToast('✅ 照片已新增');}};r.readAsDataURL(f);});
+  e.target.value='';
+}
+
+// ====== PHOTO BATCHES ======
+function renderPhotoBatches(){
+  const typeMap={kr:{label:'🇰🇷 韓國出發前',col:'var(--accent2)'},hk:{label:'🇭🇰 到達香港後',col:'var(--success)'},stock:{label:'🏪 現貨庫存照',col:'var(--accent)'}};
+  const filtered=photoTabFilter==='all'?photoBatches:photoBatches.filter(b=>b.type===photoTabFilter);
+  document.getElementById('badge-photos').textContent=photoBatches.length;
+  if(!filtered.length){
+    document.getElementById('photoBatches').innerHTML=`<div class="empty-state"><div class="empty-icon">📷</div>沒有照片批次</div>`;return;
+  }
+  document.getElementById('photoBatches').innerHTML=filtered.map(b=>{
+    const t=typeMap[b.type]||typeMap.kr;
+    const imgs=b.photos&&b.photos.length?
+      b.photos.map((src,i)=>`<div class="img-thumb"><img src="${src}"><div class="del-overlay" onclick="delBatchPhoto('${b.id}',${i})">🗑️</div></div>`).join('')+
+      `<div class="img-placeholder" onclick="addPhotoToBatch('${b.id}')"><div class="icon">＋</div></div>` :
+      `<div class="img-placeholder" style="grid-column:span 4" onclick="addPhotoToBatch('${b.id}')"><div class="icon">📷</div><div>點擊上傳照片</div></div>`;
+    return `<div class="photo-batch">
+      <div class="photo-batch-header">
+        <div class="photo-batch-title"><span style="color:${t.col}">${t.label}</span><span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--text3)">${b.id}</span></div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="photo-batch-meta">${b.date} &nbsp;|&nbsp; ${b.photos?b.photos.length:0} 張 &nbsp;|&nbsp; ${b.note}</span>
+          <button class="icon-btn" onclick="openPhotoForm('${b.id}')">✏️</button>
+          <button class="icon-btn del" onclick="confirmDelete('batch','${b.id}')">🗑️</button>
+        </div>
+      </div>
+      <div class="img-grid">${imgs}</div>
+      <input type="file" id="addphoto-${b.id}" accept="image/*" multiple style="display:none" onchange="handleAddPhotoToBatch(event,'${b.id}')">
+    </div>`;
+  }).join('');
+}
+
+function addPhotoToBatch(id){document.getElementById('addphoto-'+id).click();}
+function handleAddPhotoToBatch(e,id){
+  const b=photoBatches.find(x=>x.id===id);if(!b.photos)b.photos=[];
+  const files=[...e.target.files];let done=0;
+  files.forEach(f=>{const r=new FileReader();r.onload=ev=>{b.photos.push(ev.target.result);done++;if(done===files.length){renderPhotoBatches();showToast('✅ 照片已新增至批次');}};r.readAsDataURL(f);});
+  e.target.value='';
+}
+function delBatchPhoto(id,idx){
+  const b=photoBatches.find(x=>x.id===id);b.photos.splice(idx,1);renderPhotoBatches();
+}
+
+function openPhotoForm(id){
+  pbTempPhotos=[];
+  const b=id?photoBatches.find(x=>x.id===id):null;
+  document.getElementById('photoFormTitle').textContent=b?'✏️ 編輯照片批次':'➕ 新增照片批次';
+  document.getElementById('editPhotoBatch').value=b?b.id:'';
+  document.getElementById('pbType').value=b?b.type:'kr';
+  document.getElementById('pbRef').value=b?b.ref:'';
+  document.getElementById('pbNote').value=b?b.note:'';
+  document.getElementById('pbPhotoPreview').innerHTML='';
+  document.getElementById('photoFormModal').classList.add('open');
+}
+function triggerPhotoUpload(){document.getElementById('photoFileInput').click();}
+function handlePhotoBatchUpload(e){
+  const files=[...e.target.files];
+  files.forEach(f=>{const r=new FileReader();r.onload=ev=>{pbTempPhotos.push(ev.target.result);renderPbPreview();};r.readAsDataURL(f);});
+  e.target.value='';
+}
+function renderPbPreview(){
+  document.getElementById('pbPhotoPreview').innerHTML=pbTempPhotos.map((src,i)=>
+    `<div class="img-thumb"><img src="${src}"><div class="del-overlay" onclick="pbTempPhotos.splice(${i},1);renderPbPreview()">🗑️</div></div>`).join('');
+}
+function savePhotoBatch(){
+  const eid=document.getElementById('editPhotoBatch').value;
+  const type=document.getElementById('pbType').value;
+  const now=new Date();
+  const data={type,ref:document.getElementById('pbRef').value,note:document.getElementById('pbNote').value,
+    date:now.toISOString().slice(0,10)+' '+now.toTimeString().slice(0,5)};
+  if(eid){
+    const idx=photoBatches.findIndex(x=>x.id===eid);
+    photoBatches[idx]={...photoBatches[idx],...data};
+    if(pbTempPhotos.length)photoBatches[idx].photos=[...(photoBatches[idx].photos||[]),...pbTempPhotos];
+    showToast('✅ 批次已更新');
+  } else {
+    data.id='BATCH-'+type.toUpperCase()+'-'+Date.now().toString().slice(-8);
+    data.photos=[...pbTempPhotos];
+    photoBatches.unshift(data);showToast('✅ 新增照片批次：'+data.id);
+  }
+  closeModal('photoFormModal');renderPhotoBatches();
+}
+function switchPhotoTab(tab,el){
+  photoTabFilter=tab;
+  document.querySelectorAll('.tab-bar .tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderPhotoBatches();
+}
+
+// ====== PROBLEMS ======
+function renderProblems(){
+  document.getElementById('problemTbody').innerHTML=problems.map(p=>`<tr>
+    <td style="font-family:'Space Mono',monospace;font-size:11px;color:var(--text3)">${p.id}</td>
+    <td style="font-family:'Space Mono',monospace;font-size:11px;color:var(--accent)">${p.order}</td>
+    <td>${p.type}</td>
+    <td><span class="priority p-${p.priority}">${p.priority==='high'?'緊急':p.priority==='mid'?'重要':'一般'}</span></td>
+    <td style="max-width:160px;font-size:12px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${p.desc}">${p.desc}</td>
+    <td><span class="status ${p.status==='已解決'?'s-hk-shipped':'s-purchased'}">${p.status}</span></td>
+    <td>${p.person}</td>
+    <td style="font-size:11px;color:var(--text2)">${p.date}</td>
+    <td><div class="action-btns">
+      <button class="icon-btn" onclick="openProblemForm('${p.id}')">✏️</button>
+      <button class="icon-btn del" onclick="confirmDelete('prob','${p.id}')">🗑️</button>
+    </div></td>
+  </tr>`).join('');
+  document.getElementById('badge-prob').textContent=problems.filter(p=>p.status!=='已解決').length;
+}
+
+function openProblemForm(id){
+  const p=id?problems.find(x=>x.id===id):null;
+  document.getElementById('probFormTitle').textContent=p?'✏️ 編輯問題回報':'⚠️ 新增問題回報';
+  document.getElementById('editProbId').value=p?p.id:'';
+  document.getElementById('pOrder').value=p?p.order:'';
+  document.getElementById('pType').value=p?p.type:'退款爭議';
+  document.getElementById('pPriority').value=p?p.priority:'high';
+  document.getElementById('pPerson').value=p?p.person:'';
+  document.getElementById('pStatus').value=p?p.status:'處理中';
+  document.getElementById('pDesc').value=p?p.desc:'';
+  document.getElementById('problemFormModal').classList.add('open');
+}
+
+function saveProblem(){
+  const eid=document.getElementById('editProbId').value;
+  const desc=document.getElementById('pDesc').value.trim();
+  if(!desc){showToast('❌ 請填寫問題描述','error');return;}
+  const data={order:document.getElementById('pOrder').value,type:document.getElementById('pType').value,
+    priority:document.getElementById('pPriority').value,desc,
+    status:document.getElementById('pStatus').value,person:document.getElementById('pPerson').value,
+    date:new Date().toISOString().slice(0,10)};
+  if(eid){const idx=problems.findIndex(x=>x.id===eid);problems[idx]={...problems[idx],...data};showToast('✅ 問題回報已更新');}
+  else{data.id='PRB-'+String(problems.length+1).padStart(3,'0');problems.unshift(data);showToast('✅ 問題回報已新增：'+data.id);}
+  closeModal('problemFormModal');renderProblems();
+}
+
+// ====== CS RECORDS ======
+function renderCS(){
+  const prMap={high:'🔴 緊急',mid:'🟡 重要',low:'🟢 一般'};
+  document.getElementById('csTbody').innerHTML=csRecords.map(c=>`<tr>
+    <td style="font-family:'Space Mono',monospace;font-size:11px;color:var(--text3)">${c.id}</td>
+    <td>${c.type}</td>
+    <td><span class="priority p-${c.priority}">${c.priority==='high'?'緊急':c.priority==='mid'?'重要':'一般'}</span></td>
+    <td><strong>${c.title}</strong></td>
+    <td style="max-width:160px;font-size:12px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${c.desc}">${c.desc}</td>
+    <td style="font-size:12px;color:var(--text2)">${c.contact}</td>
+    <td><span class="status ${c.status==='已解決'?'s-hk-shipped':'s-purchased'}">${c.status}</span></td>
+    <td style="font-size:11px;color:var(--text2)">${c.date}</td>
+    <td><div class="action-btns">
+      <button class="icon-btn" onclick="openCSForm('${c.id}')">✏️</button>
+      <button class="icon-btn del" onclick="confirmDelete('cs','${c.id}')">🗑️</button>
+    </div></td>
+  </tr>`).join('');
+  const total=csRecords.length,done=csRecords.filter(c=>c.status==='已解決').length;
+  document.getElementById('cs-stat-total').textContent=total;
+  document.getElementById('cs-stat-done').textContent=done;
+  document.getElementById('cs-stat-pending').textContent=total-done;
+  document.getElementById('cs-stat-pct').textContent=(total?Math.round(done/total*100):0)+'% 完成率';
+  document.getElementById('badge-cs').textContent=total;
+}
+
+function openCSForm(id){
+  const c=id?csRecords.find(x=>x.id===id):null;
+  document.getElementById('csFormTitle').textContent=c?'✏️ 編輯客服紀錄':'➕ 新增客服紀錄';
+  document.getElementById('editCsId').value=c?c.id:'';
+  document.getElementById('csType').value=c?c.type:'投訴';
+  document.getElementById('csPriority').value=c?c.priority:'high';
+  document.getElementById('csTitle').value=c?c.title:'';
+  document.getElementById('csDesc').value=c?c.desc:'';
+  document.getElementById('csContact').value=c?c.contact:'';
+  document.getElementById('csStatus').value=c?c.status:'處理中';
+  document.getElementById('csFormModal').classList.add('open');
+}
+
+function saveCS(){
+  const eid=document.getElementById('editCsId').value;
+  const title=document.getElementById('csTitle').value.trim();
+  const desc=document.getElementById('csDesc').value.trim();
+  if(!title||!desc){showToast('❌ 請填寫標題及描述','error');return;}
+  const data={type:document.getElementById('csType').value,priority:document.getElementById('csPriority').value,
+    title,desc,contact:document.getElementById('csContact').value,
+    status:document.getElementById('csStatus').value,date:new Date().toISOString().slice(0,10)};
+  if(eid){const idx=csRecords.findIndex(x=>x.id===eid);csRecords[idx]={...csRecords[idx],...data};showToast('✅ 客服紀錄已更新');}
+  else{data.id='CS-'+String(csRecords.length+1).padStart(3,'0');csRecords.unshift(data);showToast('✅ 客服紀錄已新增：'+data.id);}
+  closeModal('csFormModal');renderCS();
+}
+
+// ====== DELETE ======
+function confirmDelete(type,id){
+  let msg='';
+  if(type==='order'){const o=orders.find(x=>x.id===id);msg=`刪除訂單 <strong>${id}</strong><br>${o?o.customer+' — '+o.product:''}`;}
+  else if(type==='inv'){const i=inventory.find(x=>x.sku===id);msg=`刪除庫存 <strong>${id}</strong><br>${i?i.name:''}`;}
+  else if(type==='prob'){const p=problems.find(x=>x.id===id);msg=`刪除問題回報 <strong>${id}</strong>`;}
+  else if(type==='cs'){const c=csRecords.find(x=>x.id===id);msg=`刪除客服紀錄 <strong>${id}</strong><br>${c?c.title:''}`;}
+  else if(type==='batch'){msg=`刪除照片批次 <strong>${id}</strong>`;}
+  document.getElementById('confirmMsg').innerHTML=`確定要刪除此項目嗎？此操作<strong>無法復原</strong>。<br><br>${msg}`;
+  document.getElementById('confirmOkBtn').onclick=()=>{doDelete(type,id);closeModal('confirmModal');};
+  document.getElementById('confirmModal').classList.add('open');
+}
+
+function doDelete(type,id){
+  if(type==='order'){orders=orders.filter(x=>x.id!==id);filterOrders();showToast('🗑️ 訂單已刪除：'+id);}
+  else if(type==='inv'){inventory.splice(inventory.findIndex(x=>x.sku===id),1);renderInventory();showToast('🗑️ 庫存已刪除：'+id);}
+  else if(type==='prob'){problems.splice(problems.findIndex(x=>x.id===id),1);renderProblems();showToast('🗑️ 問題回報已刪除');}
+  else if(type==='cs'){csRecords.splice(csRecords.findIndex(x=>x.id===id),1);renderCS();showToast('🗑️ 客服紀錄已刪除');}
+  else if(type==='batch'){photoBatches.splice(photoBatches.findIndex(x=>x.id===id),1);renderPhotoBatches();showToast('🗑️ 批次已刪除');}
+}
+
+// ====== ONE CLICK ======
+function oneClick(action){
+  const actions={
+    'notify-unpaid':{title:'📢 通知未付款客戶',fn:()=>{
+      const list=orders.filter(o=>o.status==='unpaid');
+      return `<div style="margin-bottom:12px;color:var(--text2);font-size:13px">已準備向以下 <strong style="color:var(--warning)">${list.length}</strong> 位客戶發送付款提醒：</div>
+      ${list.map(o=>`<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:6px;font-size:13px"><strong>${o.customer}</strong> — ${o.product} <span style="color:var(--gold);font-family:'Space Mono',monospace">HK$${o.amount}</span></div>`).join('')||'<div style="color:var(--text3)">沒有未付款訂單</div>'}
+      <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end"><button class="btn btn-ghost" onclick="closeModal('oneClickModal')">取消</button><button class="btn btn-warning" onclick="closeModal('oneClickModal');showToast('✅ 付款提醒已發送至 ${list.length} 位客戶')">📢 確認發送</button></div>`;
+    }},
+    'mark-purchased':{title:'✅ 批量標記已採購',fn:()=>{
+      const list=orders.filter(o=>o.status==='paid');
+      return `<div style="margin-bottom:12px;color:var(--text2);font-size:13px">將以下 <strong style="color:var(--success)">${list.length}</strong> 筆已付款訂單標記為「已採購」：</div>
+      ${list.map(o=>`<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:6px;font-size:13px"><strong>${o.customer}</strong> — ${o.product}</div>`).join('')||'<div style="color:var(--text3)">沒有已付款待採購訂單</div>'}
+      <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end"><button class="btn btn-ghost" onclick="closeModal('oneClickModal')">取消</button><button class="btn btn-success" onclick="batchMark('paid','purchased');closeModal('oneClickModal')">✅ 確認批量更新</button></div>`;
+    }},
+    'send-tracking':{title:'📦 發送物流通知',fn:()=>{
+      const list=orders.filter(o=>['kr-departed','hk-shipped'].includes(o.status)&&o.tracking);
+      return `<div style="margin-bottom:12px;color:var(--text2);font-size:13px">向以下 <strong style="color:var(--accent)">${list.length}</strong> 位客戶發送物流追蹤通知：</div>
+      ${list.map(o=>`<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:6px;font-size:13px"><strong>${o.customer}</strong> <span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--text2)">${o.tracking}</span></div>`).join('')||'<div style="color:var(--text3)">沒有可發送物流通知的訂單</div>'}
+      <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end"><button class="btn btn-ghost" onclick="closeModal('oneClickModal')">取消</button><button class="btn btn-primary" onclick="closeModal('oneClickModal');showToast('✅ 物流通知已發送至 ${list.length} 位客戶')">📦 確認發送</button></div>`;
+    }},
+    'export-pending':{title:'📋 匯出待辦訂單',fn:()=>{
+      const list=orders.filter(o=>!['hk-shipped','cancelled','refund'].includes(o.status));
+      return `<div style="margin-bottom:12px;color:var(--text2);font-size:13px">匯出 <strong style="color:var(--accent)">${list.length}</strong> 筆進行中訂單至 Excel</div>
+      <div style="background:var(--surface2);border-radius:8px;padding:12px;margin-bottom:12px">
+        ${['unpaid','paid','unpurchased','purchased','kr-arrived','kr-departed','hk-arrived'].map(s=>{const c=list.filter(o=>o.status===s).length;return c?`<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:var(--text2)">${statusMap[s].label}</span><span style="font-family:'Space Mono',monospace;color:var(--accent)">${c}</span></div>`:''}).join('')}
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn btn-ghost" onclick="closeModal('oneClickModal')">取消</button><button class="btn btn-primary" onclick="closeModal('oneClickModal');exportExcel()">📊 確認匯出</button></div>`;
+    }},
+    'flag-overdue':{title:'🚨 標記逾期未付款',fn:()=>{
+      const list=orders.filter(o=>o.status==='unpaid');
+      return `<div style="margin-bottom:12px;color:var(--text2);font-size:13px">以下 <strong style="color:var(--danger)">${list.length}</strong> 筆訂單未付款，確認標記為逾期？</div>
+      ${list.map(o=>`<div style="background:rgba(255,77,109,.1);border:1px solid rgba(255,77,109,.3);border-radius:8px;padding:10px 12px;margin-bottom:6px;font-size:13px"><strong>${o.customer}</strong> — ${o.product} <span style="color:var(--gold);font-family:'Space Mono',monospace">HK$${o.amount}</span><div style="font-size:11px;color:var(--text3);margin-top:2px">下單日期：${o.date}</div></div>`).join('')||'<div style="color:var(--text3)">沒有未付款訂單</div>'}
+      <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end"><button class="btn btn-ghost" onclick="closeModal('oneClickModal')">取消</button><button class="btn btn-danger" onclick="closeModal('oneClickModal');showToast('🚨 已標記 ${list.length} 筆逾期訂單')">🚨 確認標記</button></div>`;
+    }}
+  };
+  const a=actions[action];if(!a)return;
+  document.getElementById('oneClickTitle').textContent=a.title;
+  document.getElementById('oneClickBody').innerHTML=a.fn();
+  document.getElementById('oneClickModal').classList.add('open');
+}
+
+function batchMark(from,to){
+  orders.filter(o=>o.status===from).forEach(o=>o.status=to);
+  filterOrders();showToast('✅ 批量更新完成');
+}
+
+// ====== CHANNEL CONNECT ======
+function showConnect(ch){
+  const configs={
+    ig:{title:'📸 連接 Instagram',color:'linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045)',
+      body:`<div style="text-align:center;margin-bottom:16px"><div style="font-size:48px;margin-bottom:8px">📸</div><div style="font-weight:700;font-size:16px">Instagram Business API</div><div style="color:var(--text2);font-size:13px;margin-top:4px">自動接收 DM 訂單並同步至系統</div></div>
+      <div class="form-group"><label class="form-label">Instagram 帳號 ID</label><input class="form-input" placeholder="@your_account" id="igAccount"></div>
+      <div class="form-group"><label class="form-label">Access Token</label><input class="form-input" placeholder="EAAxxxxx..." type="password"></div>
+      <div style="background:rgba(0,212,170,.1);border:1px solid rgba(0,212,170,.3);border-radius:8px;padding:10px;margin-bottom:12px;font-size:12px;color:var(--success)">✅ Webhook 狀態：已連接 &nbsp;|&nbsp; 上次同步：5 分鐘前</div>
+      <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn btn-ghost" onclick="closeModal('connectModal')">取消</button><button class="btn btn-primary" style="background:linear-gradient(135deg,#833ab4,#fd1d1d)" onclick="closeModal('connectModal');showToast('✅ Instagram 已連接並同步')">🔗 確認連接</button></div>`},
+    wa:{title:'💬 連接 WhatsApp',color:'#25d366',
+      body:`<div style="text-align:center;margin-bottom:16px"><div style="font-size:48px;margin-bottom:8px">💬</div><div style="font-weight:700;font-size:16px">WhatsApp Business API</div><div style="color:var(--text2);font-size:13px;margin-top:4px">自動接收 WA 訊息並轉換為訂單</div></div>
+      <div class="form-group"><label class="form-label">電話號碼 ID</label><input class="form-input" placeholder="+852 xxxx xxxx" id="waPhone"></div>
+      <div class="form-group"><label class="form-label">Business Account ID</label><input class="form-input" placeholder="WABA ID..."></div>
+      <div style="background:rgba(0,212,170,.1);border:1px solid rgba(0,212,170,.3);border-radius:8px;padding:10px;margin-bottom:12px;font-size:12px;color:var(--success)">✅ 連接狀態：正常 &nbsp;|&nbsp; 待處理訊息：3 條</div>
+      <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn btn-ghost" onclick="closeModal('connectModal')">取消</button><button class="btn btn-success" onclick="closeModal('connectModal');showToast('✅ WhatsApp 已連接並同步')">🔗 確認連接</button></div>`},
+    web:{title:'🌐 連接 Website',color:'var(--accent3)',
+      body:`<div style="text-align:center;margin-bottom:16px"><div style="font-size:48px;margin-bottom:8px">🌐</div><div style="font-weight:700;font-size:16px">Website 訂單 API</div><div style="color:var(--text2);font-size:13px;margin-top:4px">自動同步網店訂單至此管理系統</div></div>
+      <div class="form-group"><label class="form-label">網站 URL</label><input class="form-input" placeholder="https://yourshop.com" id="webUrl"></div>
+      <div class="form-group"><label class="form-label">API Key</label><input class="form-input" placeholder="sk-xxxxx..." type="password"></div>
+      <div class="form-group"><label class="form-label">Webhook URL（複製到網店）</label><input class="form-input" value="https://proxy-system.hk/webhook/orders" readonly style="color:var(--accent3);font-size:11px;font-family:'Space Mono',monospace"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn btn-ghost" onclick="closeModal('connectModal')">取消</button><button class="btn btn-success" style="background:var(--accent3);color:#000" onclick="closeModal('connectModal');showToast('✅ Website 已連接並同步')">🔗 確認連接</button></div>`}
+  };
+  const c=configs[ch];
+  document.getElementById('connectTitle').innerHTML=`<span style="background:${c.color};-webkit-background-clip:text;-webkit-text-fill-color:transparent">${c.title}</span>`;
+  document.getElementById('connectBody').innerHTML=c.body;
+  document.getElementById('connectModal').classList.add('open');
+}
+
+// ====== FILTERS ======
+function filterOrders(){
+  const q=document.getElementById('searchInput').value.toLowerCase();
+  const st=document.getElementById('statusFilter').value;
+  const filtered=orders.filter(o=>{
+    const mq=!q||o.id.toLowerCase().includes(q)||o.customer.toLowerCase().includes(q)||o.product.toLowerCase().includes(q);
+    const ms=!st||o.status===st;
+    const mc=activeChFilter==='all'||o.channel===activeChFilter;
+    return mq&&ms&&mc;
+  });
+  renderOrders(filtered);
+}
+
+function quickFilter(st){
+  document.getElementById('statusFilter').value=st;
+  const firstNav=document.querySelectorAll('.nav-item')[0];
+  showPage('orders',firstNav);
+  filterOrders();
+}
+
+function togglePill(el,ch){
+  document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');activeChFilter=ch;filterOrders();
+}
+
+function showPage(page,el){
+  document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  if(el)el.classList.add('active');
+  if(page==='inventory')renderInventory();
+  if(page==='photos')renderPhotoBatches();
+  if(page==='problems')renderProblems();
+  if(page==='cs')renderCS();
+}
+
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+function showToast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show'+(type?' '+type:'');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+function exportExcel(){
+  const wb=XLSX.utils.book_new();
+  const ws1=XLSX.utils.aoa_to_sheet([
+    ['訂單編號','渠道','客戶','商品','金額(HKD)','狀態','物流單號','下單日期','Supplier','備註'],
+    ...orders.map(o=>[o.id,channelMap[o.channel].label,o.customer,o.product,o.amount,statusMap[o.status].label,o.tracking,o.date,o.supplierName,o.note])
+  ]);
+  XLSX.utils.book_append_sheet(wb,ws1,'訂單總覽');
+  const ws2=XLSX.utils.aoa_to_sheet([
+    ['SKU','商品名稱','品牌','現有庫存','預留數量','可售數量','入庫日期'],
+    ...inventory.map(i=>[i.sku,i.name,i.brand,i.stock,i.reserved,i.stock-i.reserved,i.arrival])
+  ]);
+  XLSX.utils.book_append_sheet(wb,ws2,'現貨庫存');
+  const ws3=XLSX.utils.aoa_to_sheet([
+    ['編號','類型','標題','優先級','描述','聯絡','狀態','日期'],
+    ...csRecords.map(c=>[c.id,c.type,c.title,c.priority==='high'?'緊急':c.priority==='mid'?'重要':'一般',c.desc,c.contact,c.status,c.date])
+  ]);
+  XLSX.utils.book_append_sheet(wb,ws3,'客服紀錄');
+  XLSX.writeFile(wb,`香港代購報表_${new Date().toISOString().slice(0,10)}.xlsx`);
+  showToast('📊 Excel 報表已匯出');
+}
+
+// Init
+filterOrders();
+</script>
+</body>
+</html>
